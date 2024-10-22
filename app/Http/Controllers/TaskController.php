@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Task;
+use App\Models\Note;
+
 
 class TaskController extends Controller
 {
@@ -35,26 +38,23 @@ class TaskController extends Controller
         return response()->json(['message' => 'Task created successfully', 'task' => $task->load('notes')], 201);
     }
 
-    public function index(Request $request)
+   public function index(Request $request)
     {
+        // Initialize a query to get tasks with notes
         $tasks = Task::with('notes')
-            ->when($request->filter['status'], function ($query, $status) {
-                return $query->where('status', $status);
-            })
-            ->when($request->filter['due_date'], function ($query, $due_date) {
-                return $query->where('due_date', $due_date);
-            })
-            ->when($request->filter['priority'], function ($query, $priority) {
-                return $query->where('priority', $priority);
-            })
-            ->when($request->filter['notes'], function ($query) {
-                return $query->has('notes');
-            })
+            ->withCount('notes') // Count the notes directly in the main query
+            ->when($request->filter['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->when($request->filter['due_date'] ?? null, fn ($query, $dueDate) => $query->where('due_date', $dueDate))
+            ->when($request->filter['priority'] ?? null, fn ($query, $priority) => $query->where('priority', $priority))
+            ->when($request->filter['notes'] ?? null, fn ($query) => $query->has('notes'))
             ->orderBy('priority', 'desc')
+            ->orderBy('notes_count', 'desc') // Sort by the count of notes
             ->get();
 
         return response()->json($tasks);
     }
+
+
 
 
 }
