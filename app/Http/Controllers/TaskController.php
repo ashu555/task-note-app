@@ -8,6 +8,7 @@ class TaskController extends Controller
 {
     public function store(Request $request)
     {
+        dd('fd');
         $request->validate([
             'subject' => 'required|string|max:255',
             'description' => 'nullable|string',
