@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use App\Http\Controllers\NoteController;
 
-RateLimiter::for('api', function ($request) { // Remove type hinting for $request
-    return $request->user()
-        ? Limit::perMinute(60)->by($request->user()->id) // Authenticated user limit
-        : Limit::perMinute(10)->by($request->ip()); // Unauthenticated user limit
-});
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
